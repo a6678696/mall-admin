@@ -5,18 +5,18 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.util.Date;
+import java.util.List;
 
 /**
- * 公告实体类
+ * 商品大类实体类
  *
  * @author LeDao
  * @company
- * @create 2022-12-15 2:24
+ * @create 2022-12-15 21:33
  */
 @Data
-@TableName(value = "t_announcement")
-public class Announcement {
+@TableName(value = "t_type_big")
+public class BigType {
 
     /**
      * 编号
@@ -25,18 +25,19 @@ public class Announcement {
     private Integer id;
 
     /**
-     * 标题
+     * 名称
      */
-    private String title;
+    private String name;
 
     /**
-     * 内容
+     * 排列顺序
      */
-    private String content;
+    @TableField(value = "sortNum")
+    private Integer sortNum;
 
     /**
-     * 添加时间
+     * 该商品大类下的商品小类列表
      */
-    @TableField(value = "addDate")
-    private Date addDate;
+    @TableField(exist = false)
+    List<SmallType> smallTypeList;
 }

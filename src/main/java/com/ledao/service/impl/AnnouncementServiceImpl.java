@@ -29,11 +29,6 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     }
 
     @Override
-    public List<Announcement> list(QueryWrapper<Announcement> announcementQueryWrapper) {
-        return announcementMapper.selectList(announcementQueryWrapper);
-    }
-
-    @Override
     public Long getCount(QueryWrapper<Announcement> announcementQueryWrapper) {
         return announcementMapper.selectCount(announcementQueryWrapper);
     }
