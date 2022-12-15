@@ -25,14 +25,6 @@ public interface AnnouncementService {
     List<Announcement> list(QueryWrapper<Announcement> announcementQueryWrapper, Page<Announcement> announcementPage);
 
     /**
-     * 不分页条件查询公告
-     *
-     * @param announcementQueryWrapper
-     * @return
-     */
-    List<Announcement> list(QueryWrapper<Announcement> announcementQueryWrapper);
-
-    /**
      * 获取记录数
      *
      * @param announcementQueryWrapper
