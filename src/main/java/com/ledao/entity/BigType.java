@@ -40,4 +40,10 @@ public class BigType {
      */
     @TableField(exist = false)
     List<SmallType> smallTypeList;
+
+    /**
+     * 该商品大类下的商品小类数量
+     */
+    @TableField(exist = false)
+    private Integer smallTypeNum;
 }

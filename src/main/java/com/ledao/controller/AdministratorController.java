@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.ledao.entity.Administrator;
 import com.ledao.entity.R;
 import com.ledao.service.AdministratorService;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,7 +34,7 @@ public class AdministratorController {
      * @param administrator
      * @return
      */
-    @PostMapping("/login")
+    @GetMapping("/login")
     public R login(Administrator administrator) {
         //没有输入用户名时
         if (StrUtil.isEmpty(administrator.getUserName())) {

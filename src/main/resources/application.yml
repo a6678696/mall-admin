@@ -15,6 +15,10 @@ spring:
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
 
 mybatis-plus:
   global-config:
@@ -23,5 +27,7 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true #开启驼峰功能
     auto-mapping-behavior: FULL #自动映射任何复杂的结果
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   mapper-locations: classpath:/mybatis/mapper/*.xml
+
+#公告或商品详情图片存储地址
+goodsDetailsImageFilePath: E://data/mall/images/goods/details/

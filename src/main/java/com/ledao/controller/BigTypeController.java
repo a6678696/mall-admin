@@ -49,8 +49,15 @@ public class BigTypeController {
         }
         queryWrapper.orderByAsc("sortNum");
         Page<BigType> bigTypePage = new Page<>(currentPage, pageSize);
-        map.put("bigTypeList", bigTypeService.list(queryWrapper, bigTypePage));
-        map.put("total", bigTypeService.getCount(queryWrapper));
+        List<BigType> bigTypeList = bigTypeService.list(queryWrapper, bigTypePage);
+        for (BigType type : bigTypeList) {
+            QueryWrapper<SmallType> smallTypeQueryWrapper = new QueryWrapper<>();
+            smallTypeQueryWrapper.eq("bigTypeId", type.getId());
+            type.setSmallTypeNum(smallTypeService.list(smallTypeQueryWrapper).size());
+        }
+        Long total = bigTypeService.getCount(queryWrapper);
+        map.put("bigTypeList", bigTypeList);
+        map.put("total", total);
         return R.ok(map);
     }
 
@@ -94,7 +101,7 @@ public class BigTypeController {
      * @param id
      * @return
      */
-    @GetMapping("/delete")
+    @PostMapping("/delete")
     public R delete(Integer id) {
         int key = bigTypeService.deleteById(id);
         if (key > 0) {
@@ -105,12 +112,33 @@ public class BigTypeController {
     }
 
     /**
-     * 获取全部商品大类(在商品小类中使用)
+     * 获取全部商品大类(在商品小类管理中使用)
      *
      * @return
      */
     @GetMapping("/getAllBigType")
     public R getAllBigType() {
+        Map<String, Object> map = new HashMap<>(16);
+        QueryWrapper<BigType> bigTypeQueryWrapper = new QueryWrapper<>();
+        bigTypeQueryWrapper.orderByAsc("sortNum");
+        List<BigType> bigTypeList = bigTypeService.list(bigTypeQueryWrapper);
+        for (BigType bigType : bigTypeList) {
+            QueryWrapper<SmallType> smallTypeQueryWrapper = new QueryWrapper<>();
+            smallTypeQueryWrapper.orderByAsc("sortNum");
+            smallTypeQueryWrapper.eq("bigTypeId", bigType.getId());
+            bigType.setSmallTypeList(smallTypeService.list(smallTypeQueryWrapper));
+        }
+        map.put("allBigTypeList", bigTypeList);
+        return R.ok(map);
+    }
+
+    /**
+     * 获取全部商品大类(排除掉没有商品小类的),在商品小类管理中使用
+     *
+     * @return
+     */
+    @GetMapping("/getAllBigTypeRemoveSmallTypeNumIsZero")
+    public R getAllBigTypeRemoveSmallTypeNumIsZero() {
         Map<String, Object> map = new HashMap<>(16);
         QueryWrapper<BigType> bigTypeQueryWrapper = new QueryWrapper<>();
         bigTypeQueryWrapper.orderByAsc("sortNum");

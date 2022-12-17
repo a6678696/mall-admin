@@ -97,7 +97,7 @@ public class SmallTypeController {
      * @param id
      * @return
      */
-    @GetMapping("/delete")
+    @PostMapping("/delete")
     public R delete(Integer id) {
         int key = smallTypeService.deleteById(id);
         if (key > 0) {
