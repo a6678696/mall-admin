@@ -29,5 +29,9 @@ mybatis-plus:
     auto-mapping-behavior: FULL #自动映射任何复杂的结果
   mapper-locations: classpath:/mybatis/mapper/*.xml
 
-#公告或商品详情图片存储地址
+#商品详情图片存储地址
 goodsDetailsImageFilePath: E://data/mall/images/goods/details/
+#商品卡片图片存储地址
+cardImageFilePath: E://data/mall/images/goods/card/
+#商品卡片图片存储地址
+goodsDetailsSwiperImageFilePath: E://data/mall/images/goods/swiper/

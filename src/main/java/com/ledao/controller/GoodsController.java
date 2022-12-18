@@ -14,13 +14,10 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 商品Controller层
@@ -35,6 +32,12 @@ public class GoodsController {
 
     @Value("${goodsDetailsImageFilePath}")
     private String goodsDetailsImageFilePath;
+
+    @Value("${cardImageFilePath}")
+    private String cardImageFilePath;
+
+    @Value("${goodsDetailsSwiperImageFilePath}")
+    private String goodsDetailsSwiperImageFilePath;
 
     @Resource
     private GoodsService goodsService;
@@ -82,8 +85,8 @@ public class GoodsController {
             goods.setSwiperGoods(false);
             goods.setHotGoods(false);
             goods.setSalesVolume(0);
-            goods.setCardImageName("default.png");
-            goods.setSwiperImageName("default.png");
+            goods.setCardImageName("default.jpg");
+            goods.setSwiperImageName("default.jpg");
             SmallType smallType = smallTypeService.findById(goods.getSmallTypeId());
             BigType bigType = bigTypeService.findById(smallType.getBigTypeId());
             goods.setTypeName(bigType.getName() + "/" + smallType.getName());
@@ -110,6 +113,10 @@ public class GoodsController {
      */
     @PostMapping("/delete")
     public R delete(Integer id) {
+        Goods goods = goodsService.findById(id);
+        if (!"default.jpg".equals(goods.getCardImageName())) {
+            FileUtils.deleteQuietly(new File(cardImageFilePath + goods.getCardImageName()));
+        }
         int key = goodsService.deleteById(id);
         if (key > 0) {
             return R.ok("删除成功");
@@ -173,17 +180,14 @@ public class GoodsController {
     }
 
     /**
-     * VueQuill富文本编辑器上传图片
+     * wangEditor富文本编辑器上传图片
      *
-     * @param request
+     * @param multipartFile
      * @return
      * @throws Exception
      */
-    @PostMapping("/vueQuillUploadImage")
-    public Map<String, Object> vueQuillUploadImage(HttpServletRequest request) throws Exception {
-        //获取到文件
-        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-        MultipartFile multipartFile = multipartRequest.getFile("image");
+    @PostMapping("/wangEditorUploadImage")
+    public Map<String, Object> wangEditorUploadImage(@RequestParam("image") MultipartFile multipartFile) throws Exception {
         //给图片定义一个名称
         String newFileName = DateUtil.getCurrentDateStr2() + System.currentTimeMillis() + ".jpg";
         assert multipartFile != null;
@@ -191,7 +195,89 @@ public class GoodsController {
         FileUtils.copyInputStreamToFile(multipartFile.getInputStream(), new File(goodsDetailsImageFilePath + "/" + newFileName));
         //返回指定的格式给前端使用
         Map<String, Object> map = new HashMap<>(16);
-        map.put("url", "http://localhost:8080/image/goods/details/" + newFileName);
+        map.put("errno", 0);
+        //返回的数据,wangEditor接收
+        Map<String, String> data = new HashMap<>(16);
+        data.put("url", "http://localhost:8080/image/goods/details/" + newFileName);
+        data.put("alt", newFileName);
+        data.put("href", "http://localhost:8080/image/goods/details/" + newFileName);
+        map.put("data", data);
         return map;
+    }
+
+    /**
+     * 设置商品卡片图片
+     *
+     * @param file
+     * @param goodsId
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/setCardImage")
+    public void setCardImage(MultipartFile file, Integer goodsId) throws Exception {
+        //给图片定义一个名称
+        String newFileName = DateUtil.getCurrentDateStr2() + System.currentTimeMillis() + ".jpg";
+        assert file != null;
+        //实现将图片保存到指定位置
+        FileUtils.copyInputStreamToFile(file.getInputStream(), new File(cardImageFilePath + newFileName));
+        Goods goods = goodsService.findById(goodsId);
+        String oldCardImageName = goods.getCardImageName();
+        goods.setCardImageName(newFileName);
+        goodsService.update(goods);
+        if (!"default.jpg".equals(oldCardImageName)) {
+            FileUtils.deleteQuietly(new File(cardImageFilePath + oldCardImageName));
+        }
+    }
+
+    /**
+     * 上传商品详情轮播图图片
+     *
+     * @param file
+     * @param goodsId
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/updateGoodsDetailsSwiperImage")
+    public void updateGoodsDetailsSwiperImage(MultipartFile file, Integer goodsId) throws Exception {
+        //给图片定义一个名称
+        String newFileName = DateUtil.getCurrentDateStr2() + System.currentTimeMillis() + ".jpg";
+        assert file != null;
+        //实现将图片保存到指定位置
+        FileUtils.copyInputStreamToFile(file.getInputStream(), new File(goodsDetailsSwiperImageFilePath + newFileName));
+        Goods goods = goodsService.findById(goodsId);
+        String newGoodsDetailsSwiperImageStr = goods.getGoodsDetailsSwiperImageStr() + "," + newFileName;
+        System.out.println(newGoodsDetailsSwiperImageStr);
+        goods.setGoodsDetailsSwiperImageStr(newGoodsDetailsSwiperImageStr);
+        goodsService.update(goods);
+    }
+
+    /**
+     * 获取商品详情图片名称列表
+     *
+     * @param goodsId
+     * @return
+     */
+    @GetMapping("/getGoodsDetailsSwiperImageNameList")
+    public Map<String, Object> getGoodsDetailsSwiperImageNameList(Integer goodsId) {
+        Map<String, Object> resultMap = new HashMap<>(16);
+        Goods goods = goodsService.findById(goodsId);
+        List<String> imageNameLsit = Arrays.asList(goods.getGoodsDetailsSwiperImageStr().split(","));
+        Collections.reverse(imageNameLsit);
+        resultMap.put("imageNameLsit", imageNameLsit);
+        return resultMap;
+    }
+
+    /**
+     * 删除商品详情轮播图图片并修改数据库中的数据
+     *
+     * @param goodsId
+     * @param imageName
+     */
+    @PostMapping("/deleteGoodsDetailsSwiperImage")
+    public void deleteGoodsDetailsSwiperImage(Integer goodsId, String imageName) {
+        FileUtils.deleteQuietly(new File(goodsDetailsSwiperImageFilePath + imageName));
+        Goods goods = goodsService.findById(goodsId);
+        goods.setGoodsDetailsSwiperImageStr(goods.getGoodsDetailsSwiperImageStr().replaceAll("," + imageName, ""));
+        goodsService.update(goods);
     }
 }

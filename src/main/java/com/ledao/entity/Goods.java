@@ -74,4 +74,9 @@ public class Goods {
      *库存
      */
     private Integer stock;
+    /**
+     * 商品详情轮播图图片名称拼接的字符串
+     */
+    @TableField(value = "goodsDetailsSwiperImageStr")
+    private String goodsDetailsSwiperImageStr;
 }
