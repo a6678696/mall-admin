@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.util.Date;
+import java.util.List;
+
 /**
  * 商品实体类
  *
@@ -57,6 +60,21 @@ public class Goods {
     @TableField(value = "swiperGoods")
     private Boolean swiperGoods;
     /**
+     * 设置成首页轮播图商品时间
+     */
+    @TableField(value = "setSwiperGoodsDate")
+    private Date setSwiperGoodsDate;
+    /**
+     * 是否是推荐商品
+     */
+    @TableField(value = "recommendGoods")
+    private Boolean recommendGoods;
+    /**
+     * 推荐时间
+     */
+    @TableField(value = "recommendDate")
+    private Date recommendDate;
+    /**
      *首页轮播图图片名称
      */
     @TableField(value = "swiperImageName")
@@ -79,4 +97,9 @@ public class Goods {
      */
     @TableField(value = "goodsDetailsSwiperImageStr")
     private String goodsDetailsSwiperImageStr;
+    /**
+     * 商品详情轮播图图片名称列表
+     */
+    @TableField(exist = false)
+    private List<String> swiperImageNameList;
 }

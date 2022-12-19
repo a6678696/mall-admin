@@ -1,5 +1,10 @@
 package com.ledao.controller;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.extra.tokenizer.Result;
+import cn.hutool.extra.tokenizer.TokenizerEngine;
+import cn.hutool.extra.tokenizer.TokenizerUtil;
+import cn.hutool.extra.tokenizer.Word;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ledao.entity.BigType;
@@ -10,6 +15,7 @@ import com.ledao.service.BigTypeService;
 import com.ledao.service.GoodsService;
 import com.ledao.service.SmallTypeService;
 import com.ledao.util.DateUtil;
+import org.ansj.splitWord.analysis.ToAnalysis;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -57,7 +63,7 @@ public class GoodsController {
      * @return
      */
     @GetMapping("/list")
-    public R list(Goods goods, @RequestParam(value = "currentPage", required = false) Integer currentPage, @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+    public R list(Goods goods, @RequestParam(value = "currentPage", required = false) Integer currentPage, @RequestParam(value = "pageSize", required = false) Integer pageSize, Integer sortByIdDesc) {
         Map<String, Object> map = new HashMap<>(16);
         Page<Goods> goodsPage = new Page<>(currentPage, pageSize);
         QueryWrapper<Goods> goodsQueryWrapper = new QueryWrapper<>();
@@ -67,8 +73,47 @@ public class GoodsController {
         if (goods.getSmallTypeId() != null) {
             goodsQueryWrapper.eq("smallTypeId", goods.getSmallTypeId());
         }
+        if (goods.getHotGoods() != null) {
+            goodsQueryWrapper.eq("hotGoods", goods.getHotGoods());
+        }
+        if (goods.getRecommendGoods() != null) {
+            goodsQueryWrapper.eq("recommendGoods", goods.getRecommendGoods());
+        }
+        if (goods.getSwiperGoods() != null) {
+            goodsQueryWrapper.eq("swiperGoods", goods.getSwiperGoods());
+        }
+        if (sortByIdDesc != null) {
+            goodsQueryWrapper.orderByDesc("id");
+        }
         map.put("goodsList", goodsService.list(goodsQueryWrapper, goodsPage));
         map.put("total", goodsService.getCount(goodsQueryWrapper));
+        return R.ok(map);
+    }
+
+    /**
+     * 不分页条件查询商品
+     *
+     * @param goods
+     * @return
+     */
+    @GetMapping("/listNoPage")
+    public R listNoPage(Goods goods) {
+        Map<String, Object> map = new HashMap<>(16);
+        QueryWrapper<Goods> goodsQueryWrapper = new QueryWrapper<>();
+        if (goods.getSmallTypeId() != null) {
+            goodsQueryWrapper.eq("smallTypeId", goods.getSmallTypeId());
+        }
+        if (goods.getName() != null) {
+            //分词搜索
+            /*String analysisedText = ToAnalysis.parse(goods.getName()).toStringWithOutNature();
+            String[] word = analysisedText.split(",");
+            for (String s : word) {
+                goodsQueryWrapper.or().like("name", s);
+            }*/
+            goodsQueryWrapper.like("name", goods.getName()).or().like("description", goods.getName());
+        }
+        List<Goods> goodsList = goodsService.list(goodsQueryWrapper);
+        map.put("goodsList", goodsList);
         return R.ok(map);
     }
 
@@ -81,17 +126,19 @@ public class GoodsController {
     @PostMapping("/save")
     public R save(Goods goods) {
         int key;
+        //添加商品
         if (goods.getId() == null) {
             goods.setSwiperGoods(false);
             goods.setHotGoods(false);
+            goods.setRecommendGoods(false);
             goods.setSalesVolume(0);
             goods.setCardImageName("default.jpg");
-            goods.setSwiperImageName("default.jpg");
+            goods.setGoodsDetailsSwiperImageStr("");
             SmallType smallType = smallTypeService.findById(goods.getSmallTypeId());
             BigType bigType = bigTypeService.findById(smallType.getBigTypeId());
             goods.setTypeName(bigType.getName() + "/" + smallType.getName());
             key = goodsService.add(goods);
-        } else {
+        } else {//修改商品
             goods.setSmallTypeId(goods.getSmallTypeId());
             SmallType smallType = smallTypeService.findById(goods.getSmallTypeId());
             BigType bigType = bigTypeService.findById(smallType.getBigTypeId());
@@ -152,12 +199,34 @@ public class GoodsController {
     @PostMapping("/changeSwiperGoodsStatus")
     public R changeSwiperGoodsStatus(Integer id) {
         Goods goods = goodsService.findById(id);
+        if (!goods.getSwiperGoods()) {
+            goods.setSetSwiperGoodsDate(new Date());
+        }
         goods.setSwiperGoods(!goods.getSwiperGoods());
         goodsService.update(goods);
         if (goods.getSwiperGoods()) {
             return R.ok("商品已经被设置为首页轮播图商品");
         } else {
             return R.ok("商品已经被设置为非首页轮播图商品");
+        }
+    }
+
+    /**
+     * 改变商品的推荐状态
+     *
+     * @param id
+     * @return
+     */
+    @PostMapping("/changeRecommendGoodsStatus")
+    public R changeRecommendGoodsStatus(Integer id) {
+        Goods goods = goodsService.findById(id);
+        goods.setRecommendGoods(!goods.getRecommendGoods());
+        goods.setRecommendDate(new Date());
+        goodsService.update(goods);
+        if (goods.getRecommendGoods()) {
+            return R.ok("商品已经被设置为推荐商品");
+        } else {
+            return R.ok("商品已经被设置为非推荐商品");
         }
     }
 
@@ -174,6 +243,16 @@ public class GoodsController {
         map.put("goods", goods);
         SmallType smallType = smallTypeService.findById(goods.getSmallTypeId());
         BigType bigType = bigTypeService.findById(smallType.getBigTypeId());
+        //商品详情轮播图图片名称列表
+        List<String> swiperImageImageUrlList = Arrays.asList(goods.getGoodsDetailsSwiperImageStr().split(","));
+        //商品详情轮播图图片链接列表(可直接访问到图片)
+        List<String> resultList = new ArrayList<>();
+        for (String s : swiperImageImageUrlList) {
+            if (!"".equals(s)) {
+                resultList.add("http://localhost:8080/image/goods/swiper/" + s);
+            }
+        }
+        goods.setSwiperImageNameList(resultList);
         int[] typeId = new int[]{bigType.getId(), smallType.getId()};
         map.put("typeId", typeId);
         return R.ok(map);
@@ -246,7 +325,6 @@ public class GoodsController {
         FileUtils.copyInputStreamToFile(file.getInputStream(), new File(goodsDetailsSwiperImageFilePath + newFileName));
         Goods goods = goodsService.findById(goodsId);
         String newGoodsDetailsSwiperImageStr = goods.getGoodsDetailsSwiperImageStr() + "," + newFileName;
-        System.out.println(newGoodsDetailsSwiperImageStr);
         goods.setGoodsDetailsSwiperImageStr(newGoodsDetailsSwiperImageStr);
         goodsService.update(goods);
     }
@@ -279,5 +357,37 @@ public class GoodsController {
         Goods goods = goodsService.findById(goodsId);
         goods.setGoodsDetailsSwiperImageStr(goods.getGoodsDetailsSwiperImageStr().replaceAll("," + imageName, ""));
         goodsService.update(goods);
+    }
+
+    /**
+     * 获取首页轮播图商品
+     *
+     * @return
+     */
+    @GetMapping("/getIndexSwiperGoodsList")
+    public R getIndexSwiperGoodsList() {
+        Map<String, Object> map = new HashMap<>(16);
+        QueryWrapper<Goods> goodsQueryWrapper = new QueryWrapper<>();
+        goodsQueryWrapper.eq("swiperGoods", true);
+        goodsQueryWrapper.orderByDesc("setSwiperGoodsDate");
+        List<Goods> goodsList = goodsService.list(goodsQueryWrapper);
+        map.put("goodsList", goodsList);
+        return R.ok(map);
+    }
+
+    /**
+     * 获取推荐商品
+     *
+     * @return
+     */
+    @GetMapping("/getRecommendGoodsList")
+    public R getRecommendGoodsList() {
+        Map<String, Object> map = new HashMap<>(16);
+        QueryWrapper<Goods> goodsQueryWrapper = new QueryWrapper<>();
+        goodsQueryWrapper.eq("recommendGoods", true);
+        goodsQueryWrapper.orderByDesc("recommendDate");
+        List<Goods> goodsList = goodsService.list(goodsQueryWrapper);
+        map.put("goodsList", goodsList);
+        return R.ok(map);
     }
 }
