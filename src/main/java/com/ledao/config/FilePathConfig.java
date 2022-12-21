@@ -20,8 +20,11 @@ public class FilePathConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/image/swiper/**").addResourceLocations("file:E:/data/mall/images/swiper/");
         //商品卡片的图片
         registry.addResourceHandler("/image/goods/card/**").addResourceLocations("file:E:/data/mall/images/goods/card/");
+        //商品详情图片
         registry.addResourceHandler("/image/goods/details/**").addResourceLocations("file:E:/data/mall/images/goods/details/");
         //商品详情的轮播图图片
         registry.addResourceHandler("/image/goods/swiper/**").addResourceLocations("file:E:/data/mall/images/goods/swiper/");
+        //顾客头像图片
+        registry.addResourceHandler("/image/customer/avatar/**").addResourceLocations("file:E:/data/mall/images/customer/");
     }
 }

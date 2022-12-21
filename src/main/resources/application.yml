@@ -35,3 +35,5 @@ goodsDetailsImageFilePath: E://data/mall/images/goods/details/
 cardImageFilePath: E://data/mall/images/goods/card/
 #商品卡片图片存储地址
 goodsDetailsSwiperImageFilePath: E://data/mall/images/goods/swiper/
+#顾客头像图片存储地址
+customerAvatarImageFilePath: E://data/mall/images/customer/
