@@ -1,10 +1,5 @@
 package com.ledao.controller;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.extra.tokenizer.Result;
-import cn.hutool.extra.tokenizer.TokenizerEngine;
-import cn.hutool.extra.tokenizer.TokenizerUtil;
-import cn.hutool.extra.tokenizer.Word;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ledao.entity.BigType;
@@ -15,7 +10,6 @@ import com.ledao.service.BigTypeService;
 import com.ledao.service.GoodsService;
 import com.ledao.service.SmallTypeService;
 import com.ledao.util.DateUtil;
-import org.ansj.splitWord.analysis.ToAnalysis;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;

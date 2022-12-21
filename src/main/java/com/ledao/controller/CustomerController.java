@@ -7,11 +7,18 @@ import com.google.gson.JsonParser;
 import com.ledao.entity.Customer;
 import com.ledao.entity.R;
 import com.ledao.service.CustomerService;
+import com.ledao.util.DateUtil;
+import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +32,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/customer")
 public class CustomerController {
+
+    @Value("${customerAvatarImageFilePath}")
+    private String customerAvatarImageFilePath;
 
     @Resource
     private CustomerService customerService;
@@ -63,6 +73,61 @@ public class CustomerController {
             customer.setOpenid("");
             map.put("customer", customer);
         }
+        return R.ok(map);
+    }
+
+    /**
+     * 顾客选择图片后上传到服务器
+     *
+     * @param file
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/uploadImage")
+    public String uploadImage(MultipartFile file) throws Exception {
+        //给图片定义一个名称
+        String newFileName = DateUtil.getCurrentDateStr2() + System.currentTimeMillis() + ".jpg";
+        assert file != null;
+        //实现将图片保存到指定位置
+        FileUtils.copyInputStreamToFile(file.getInputStream(), new File(customerAvatarImageFilePath + newFileName));
+        return "http://localhost:8080/image/customer/avatar/" + newFileName;
+    }
+
+    /**
+     * 顾客删除图片后从服务器中删除
+     *
+     * @param url
+     */
+    @GetMapping("/deleteImage")
+    public void deleteImage(String url) {
+        String imageName = url.replaceAll("http://localhost:8080/image/customer/avatar/", "");
+        FileUtils.deleteQuietly(new File(customerAvatarImageFilePath + imageName));
+    }
+
+    /**
+     * 修改个人信息
+     *
+     * @param id
+     * @param nickName
+     * @param url
+     * @return
+     */
+    @PostMapping("/update")
+    public R update(Integer id, String nickName, String url) {
+        Customer customer = customerService.findById(id);
+        customer.setNickName(nickName);
+        if (!"".equals(url)) {
+            //顾客修改后的头像名称
+            String imageName = url.replaceAll("http://localhost:8080/image/customer/avatar/", "");
+            //原图片不是默认图片就删除
+            if (!"default.jpg".equals(customer.getAvatarImageName())) {
+                FileUtils.deleteQuietly(new File(customerAvatarImageFilePath + customer.getAvatarImageName()));
+            }
+            customer.setAvatarImageName(imageName);
+        }
+        customerService.update(customer);
+        Map<String, Object> map = new HashMap<>(16);
+        map.put("customer", customer);
         return R.ok(map);
     }
 }
