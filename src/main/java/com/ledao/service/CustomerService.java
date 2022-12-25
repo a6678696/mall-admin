@@ -25,6 +25,14 @@ public interface CustomerService {
     List<Customer> list(QueryWrapper<Customer> customerQueryWrapper, Page<Customer> customerPage);
 
     /**
+     * 获取记录数
+     *
+     * @param customerQueryWrapper
+     * @return
+     */
+    Long getTotal(QueryWrapper<Customer> customerQueryWrapper);
+
+    /**
      * 添加顾客信息
      *
      * @param customer

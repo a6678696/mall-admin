@@ -16,8 +16,6 @@ public class FilePathConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        //首页轮播图图片
-        registry.addResourceHandler("/image/swiper/**").addResourceLocations("file:E:/data/mall/images/swiper/");
         //商品卡片的图片
         registry.addResourceHandler("/image/goods/card/**").addResourceLocations("file:E:/data/mall/images/goods/card/");
         //商品详情图片

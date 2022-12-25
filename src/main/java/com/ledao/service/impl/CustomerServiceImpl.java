@@ -29,6 +29,11 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public Long getTotal(QueryWrapper<Customer> customerQueryWrapper) {
+        return customerMapper.selectCount(customerQueryWrapper);
+    }
+
+    @Override
     public int add(Customer customer) {
         return customerMapper.insert(customer);
     }

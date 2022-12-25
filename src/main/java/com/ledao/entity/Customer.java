@@ -21,15 +21,18 @@ public class Customer {
      */
     @TableId
     private Integer id;
+
     /**
      *昵称
      */
     @TableField(value = "nickName")
     private String nickName;
+
     /**
      *微信用户openid
      */
     private String openid;
+
     /**
      *头像图片名称
      */

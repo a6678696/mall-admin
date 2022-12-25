@@ -14,8 +14,10 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.*;
 
@@ -38,6 +40,9 @@ public class GoodsController {
 
     @Value("${goodsDetailsSwiperImageFilePath}")
     private String goodsDetailsSwiperImageFilePath;
+
+    @Value("${server.port}")
+    private String port;
 
     @Resource
     private GoodsService goodsService;
@@ -185,7 +190,7 @@ public class GoodsController {
     }
 
     /**
-     * 改变商品的热卖状态
+     * 改变商品的首页轮播图商品状态
      *
      * @param id
      * @return
@@ -193,8 +198,14 @@ public class GoodsController {
     @PostMapping("/changeSwiperGoodsStatus")
     public R changeSwiperGoodsStatus(Integer id) {
         Goods goods = goodsService.findById(id);
+        //如果是设置为首页轮播图商品
         if (!goods.getSwiperGoods()) {
-            goods.setSetSwiperGoodsDate(new Date());
+            //如果没有设置商品详情轮播图
+            if ("".equals(goods.getGoodsDetailsSwiperImageStr())) {
+                return R.error("设置失败,请先至少为这个商品设置一张商品详情轮播图图片");
+            } else {
+                goods.setSetSwiperGoodsDate(new Date());
+            }
         }
         goods.setSwiperGoods(!goods.getSwiperGoods());
         goodsService.update(goods);
@@ -243,7 +254,7 @@ public class GoodsController {
         List<String> resultList = new ArrayList<>();
         for (String s : swiperImageImageUrlList) {
             if (!"".equals(s)) {
-                resultList.add("http://localhost:8080/image/goods/swiper/" + s);
+                resultList.add("http://localhost:" + port + "/image/goods/swiper/" + s);
             }
         }
         goods.setSwiperImageNameList(resultList);
@@ -253,14 +264,17 @@ public class GoodsController {
     }
 
     /**
-     * wangEditor富文本编辑器上传图片
+     * VueQuill富文本编辑器上传图片
      *
-     * @param multipartFile
+     * @param request
      * @return
      * @throws Exception
      */
-    @PostMapping("/wangEditorUploadImage")
-    public Map<String, Object> wangEditorUploadImage(@RequestParam("image") MultipartFile multipartFile) throws Exception {
+    @PostMapping("/vueQuillUploadImage")
+    public Map<String, Object> vueQuillUploadImage(HttpServletRequest request) throws Exception {
+        //获取到文件
+        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+        MultipartFile multipartFile = multipartRequest.getFile("image");
         //给图片定义一个名称
         String newFileName = DateUtil.getCurrentDateStr2() + System.currentTimeMillis() + ".jpg";
         assert multipartFile != null;
@@ -268,13 +282,7 @@ public class GoodsController {
         FileUtils.copyInputStreamToFile(multipartFile.getInputStream(), new File(goodsDetailsImageFilePath + "/" + newFileName));
         //返回指定的格式给前端使用
         Map<String, Object> map = new HashMap<>(16);
-        map.put("errno", 0);
-        //返回的数据,wangEditor接收
-        Map<String, String> data = new HashMap<>(16);
-        data.put("url", "http://localhost:8080/image/goods/details/" + newFileName);
-        data.put("alt", newFileName);
-        data.put("href", "http://localhost:8080/image/goods/details/" + newFileName);
-        map.put("data", data);
+        map.put("url", "http://localhost:" + port + "/image/goods/details/" + newFileName);
         return map;
     }
 
@@ -350,6 +358,9 @@ public class GoodsController {
         FileUtils.deleteQuietly(new File(goodsDetailsSwiperImageFilePath + imageName));
         Goods goods = goodsService.findById(goodsId);
         goods.setGoodsDetailsSwiperImageStr(goods.getGoodsDetailsSwiperImageStr().replaceAll("," + imageName, ""));
+        if ("".equals(goods.getGoodsDetailsSwiperImageStr())) {
+            goods.setSwiperGoods(false);
+        }
         goodsService.update(goods);
     }
 
