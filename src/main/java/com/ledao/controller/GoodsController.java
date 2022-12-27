@@ -133,11 +133,18 @@ public class GoodsController {
             goods.setSalesVolume(0);
             goods.setCardImageName("default.jpg");
             goods.setGoodsDetailsSwiperImageStr("");
+            goods.setAddDate(new Date());
             SmallType smallType = smallTypeService.findById(goods.getSmallTypeId());
             BigType bigType = bigTypeService.findById(smallType.getBigTypeId());
             goods.setTypeName(bigType.getName() + "/" + smallType.getName());
             key = goodsService.add(goods);
         } else {//修改商品
+            //没有修改之前的
+            Goods goodsOld = goodsService.findById(goods.getId());
+            //修改的价格和上次不同
+            if (!goodsOld.getPrice().equals(goods.getPrice())) {
+                goods.setPriceOld(goodsOld.getPrice());
+            }
             goods.setSmallTypeId(goods.getSmallTypeId());
             SmallType smallType = smallTypeService.findById(goods.getSmallTypeId());
             BigType bigType = bigTypeService.findById(smallType.getBigTypeId());
@@ -180,6 +187,9 @@ public class GoodsController {
     @PostMapping("/changeHotGoodsStatus")
     public R changeHotGoodsStatus(Integer id) {
         Goods goods = goodsService.findById(id);
+        if (!goods.getHotGoods()) {
+            goods.setSetHotGoodsDate(new Date());
+        }
         goods.setHotGoods(!goods.getHotGoods());
         goodsService.update(goods);
         if (goods.getHotGoods()) {
@@ -392,6 +402,45 @@ public class GoodsController {
         goodsQueryWrapper.eq("recommendGoods", true);
         goodsQueryWrapper.orderByDesc("recommendDate");
         List<Goods> goodsList = goodsService.list(goodsQueryWrapper);
+        map.put("goodsList", goodsList);
+        return R.ok(map);
+    }
+
+    /**
+     * 获取新品商品
+     *
+     * @return
+     */
+    @GetMapping("/getNewGoodsList")
+    public R getNewGoodsList() {
+        Map<String, Object> map = new HashMap<>(16);
+        List<Goods> goodsList = goodsService.getNewGoodsList();
+        map.put("goodsList", goodsList);
+        return R.ok(map);
+    }
+
+    /**
+     * 获取新品商品
+     *
+     * @return
+     */
+    @GetMapping("/getHotGoodsList")
+    public R getHotGoodsList() {
+        Map<String, Object> map = new HashMap<>(16);
+        List<Goods> goodsList = goodsService.getHotGoodsList();
+        map.put("goodsList", goodsList);
+        return R.ok(map);
+    }
+
+    /**
+     * 获取降价商品
+     *
+     * @return
+     */
+    @GetMapping("/getPriceDropGoodsList")
+    public R getPriceDropGoodsList() {
+        Map<String, Object> map = new HashMap<>(16);
+        List<Goods> goodsList = goodsService.getPriceDropGoodsList();
         map.put("goodsList", goodsList);
         return R.ok(map);
     }
