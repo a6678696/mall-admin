@@ -71,4 +71,25 @@ public interface GoodsService {
      * @return
      */
     Goods findById(Integer id);
+
+    /**
+     * 获取7天内发布的商品
+     *
+     * @return
+     */
+    List<Goods> getNewGoodsList();
+
+    /**
+     * 获取热卖商品
+     *
+     * @return
+     */
+    List<Goods> getHotGoodsList();
+
+    /**
+     * 获取降价的商品
+     *
+     * @return
+     */
+    List<Goods> getPriceDropGoodsList();
 }

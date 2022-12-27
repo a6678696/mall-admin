@@ -1,5 +1,6 @@
 package com.ledao.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -50,7 +51,13 @@ public class Goods {
     /**
      *价格
      */
-    private double price;
+    private Double price;
+
+    /**
+     * 上次价格
+     */
+    @TableField(value = "priceOld",updateStrategy = FieldStrategy.IGNORED)
+    private Double priceOld;
 
     /**
      *商品卡片图片名称
@@ -75,6 +82,12 @@ public class Goods {
      */
     @TableField(value = "setSwiperGoodsDate")
     private Date setSwiperGoodsDate;
+
+    /**
+     * 设置成热卖商品时间
+     */
+    @TableField(value = "setHotGoodsDate")
+    private Date setHotGoodsDate;
 
     /**
      * 是否是推荐商品
@@ -121,4 +134,10 @@ public class Goods {
      */
     @TableField(exist = false)
     private List<String> swiperImageNameList;
+
+    /**
+     * 添加的时间
+     */
+    @TableField(value = "addDate")
+    private Date addDate;
 }
