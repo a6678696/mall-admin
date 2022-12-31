@@ -53,6 +53,12 @@ public class Valuation {
     private Integer goodsId;
 
     /**
+     * 商品名称,用于后台搜索
+     */
+    @TableField(exist = false)
+    private String goodsName;
+
+    /**
      * 商品实体
      */
     @TableField(exist = false)

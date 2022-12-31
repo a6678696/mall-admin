@@ -29,6 +29,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Long getCount(QueryWrapper<Order> orderQueryWrapper) {
+        return orderMapper.selectCount(orderQueryWrapper);
+    }
+
+    @Override
     public List<Order> list(QueryWrapper<Order> orderQueryWrapper) {
         return orderMapper.selectList(orderQueryWrapper);
     }
@@ -46,5 +51,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order findById(Integer id) {
         return orderMapper.selectById(id);
+    }
+
+    @Override
+    public int deleteById(Integer id) {
+        return orderMapper.deleteById(id);
     }
 }

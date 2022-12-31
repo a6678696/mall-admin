@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 顾客实体类
  *
@@ -38,4 +40,10 @@ public class Customer {
      */
     @TableField(value = "avatarImageName")
     private String avatarImageName;
+
+    /**
+     * 收货地址列表
+     */
+    @TableField(exist = false)
+    List<Address> addressList;
 }

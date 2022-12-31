@@ -1,6 +1,7 @@
 package com.ledao.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ledao.entity.Valuation;
 import com.ledao.mapper.ValuationMapper;
 import com.ledao.service.ValuationService;
@@ -30,5 +31,20 @@ public class ValuationServiceImpl implements ValuationService {
     @Override
     public List<Valuation> list(QueryWrapper<Valuation> valuationQueryWrapper) {
         return valuationMapper.selectList(valuationQueryWrapper);
+    }
+
+    @Override
+    public List<Valuation> list(QueryWrapper<Valuation> valuationQueryWrapper, Page<Valuation> valuationPage) {
+        return valuationMapper.selectPage(valuationPage, valuationQueryWrapper).getRecords();
+    }
+
+    @Override
+    public Long getCount(QueryWrapper<Valuation> valuationQueryWrapper) {
+        return valuationMapper.selectCount(valuationQueryWrapper);
+    }
+
+    @Override
+    public int deleteById(Integer id) {
+        return valuationMapper.deleteById(id);
     }
 }

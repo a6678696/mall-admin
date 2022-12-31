@@ -25,6 +25,14 @@ public interface OrderService {
     List<Order> list(QueryWrapper<Order> orderQueryWrapper, Page<Order> orderPage);
 
     /**
+     * 获取记录数
+     *
+     * @param orderQueryWrapper
+     * @return
+     */
+    Long getCount(QueryWrapper<Order> orderQueryWrapper);
+
+    /**
      * 不分页条件查询
      *
      * @param orderQueryWrapper
@@ -55,4 +63,12 @@ public interface OrderService {
      * @return
      */
     Order findById(Integer id);
+
+    /**
+     * 根据id删除
+     *
+     * @param id
+     * @return
+     */
+    int deleteById(Integer id);
 }

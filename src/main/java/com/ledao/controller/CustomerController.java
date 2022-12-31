@@ -6,8 +6,10 @@ import cn.hutool.setting.Setting;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.JsonParser;
+import com.ledao.entity.Address;
 import com.ledao.entity.Customer;
 import com.ledao.entity.R;
+import com.ledao.service.AddressService;
 import com.ledao.service.CustomerService;
 import com.ledao.util.DateUtil;
 import org.apache.commons.io.FileUtils;
@@ -17,9 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 顾客Controller层
@@ -41,6 +41,9 @@ public class CustomerController {
     @Resource
     private CustomerService customerService;
 
+    @Resource
+    private AddressService addressService;
+
     /**
      * 分页条件查询顾客
      *
@@ -61,6 +64,12 @@ public class CustomerController {
             customerQueryWrapper.eq("id", customer.getId());
         }
         List<Customer> customerList = customerService.list(customerQueryWrapper, customerPage);
+        for (Customer customer1 : customerList) {
+            QueryWrapper<Address> addressQueryWrapper = new QueryWrapper<>();
+            addressQueryWrapper.eq("customerId", customer1.getId());
+            customer1.setAddressList(addressService.list(addressQueryWrapper));
+            customer1.getAddressList().sort((o1, o2) -> o2.getIsSelected().compareTo(o1.getIsSelected()));
+        }
         Long total = customerService.getTotal(customerQueryWrapper);
         map.put("customerList", customerList);
         map.put("total", total);

@@ -1,6 +1,7 @@
 package com.ledao.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ledao.entity.Valuation;
 
 import java.util.List;
@@ -29,4 +30,29 @@ public interface ValuationService {
      * @return
      */
     List<Valuation> list(QueryWrapper<Valuation> valuationQueryWrapper);
+
+    /**
+     * 分页条件查询评价
+     *
+     * @param valuationQueryWrapper
+     * @param valuationPage
+     * @return
+     */
+    List<Valuation> list(QueryWrapper<Valuation> valuationQueryWrapper, Page<Valuation> valuationPage);
+
+    /**
+     * 获取记录数
+     *
+     * @param valuationQueryWrapper
+     * @return
+     */
+    Long getCount(QueryWrapper<Valuation> valuationQueryWrapper);
+
+    /**
+     * 根据id删除
+     *
+     * @param id
+     * @return
+     */
+    int deleteById(Integer id);
 }
