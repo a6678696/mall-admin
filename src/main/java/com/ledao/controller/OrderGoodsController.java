@@ -36,6 +36,7 @@ public class OrderGoodsController {
      */
     @PostMapping("/add")
     public R add(OrderGoods orderGoods) {
+        orderGoods.setAppraiseState(0);
         int key = orderGoodsService.add(orderGoods);
         Goods goods = goodsService.findById(orderGoods.getGoodsId());
         //减库存

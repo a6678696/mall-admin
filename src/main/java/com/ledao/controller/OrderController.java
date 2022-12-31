@@ -1,6 +1,7 @@
 package com.ledao.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.ledao.entity.Goods;
 import com.ledao.entity.Order;
 import com.ledao.entity.OrderGoods;
 import com.ledao.entity.R;
@@ -98,6 +99,34 @@ public class OrderController {
         Order order = orderService.findById(orderId);
         order.setState(state);
         orderService.update(order);
+        //如果是取消订单就要恢复库存
+        if (state == 3) {
+            List<OrderGoods> orderGoodsList = orderGoodsService.listByOrderId(orderId);
+            for (OrderGoods orderGoods : orderGoodsList) {
+                Goods goods = goodsService.findById(orderGoods.getGoodsId());
+                goods.setSalesVolume(goods.getSalesVolume() - orderGoods.getNum());
+                goods.setStock(goods.getStock() + orderGoods.getNum());
+                goodsService.update(goods);
+            }
+        }
         return R.ok();
+    }
+
+    /**
+     * 根据id获取订单
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/findById")
+    public R findById(Integer id) {
+        Map<String, Object> map = new HashMap<>(16);
+        Order order = orderService.findById(id);
+        order.setOrderGoodsList(orderGoodsService.listByOrderId(order.getId()));
+        for (OrderGoods orderGoods : order.getOrderGoodsList()) {
+            orderGoods.setGoods(goodsService.findById(orderGoods.getGoodsId()));
+        }
+        map.put("order", order);
+        return R.ok(map);
     }
 }

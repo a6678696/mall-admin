@@ -28,4 +28,20 @@ public interface OrderGoodsService {
      * @return
      */
     List<OrderGoods> listByOrderId(Integer orderId);
+
+    /**
+     * 修改
+     *
+     * @param orderGoods
+     * @return
+     */
+    int update(OrderGoods orderGoods);
+
+    /**
+     * 根据id查找
+     *
+     * @param id
+     * @return
+     */
+    OrderGoods findById(Integer id);
 }

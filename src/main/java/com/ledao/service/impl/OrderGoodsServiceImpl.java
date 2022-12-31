@@ -33,4 +33,14 @@ public class OrderGoodsServiceImpl implements OrderGoodsService {
         orderGoodsQueryWrapper.eq("orderId", orderId);
         return orderGoodsMapper.selectList(orderGoodsQueryWrapper);
     }
+
+    @Override
+    public int update(OrderGoods orderGoods) {
+        return orderGoodsMapper.updateById(orderGoods);
+    }
+
+    @Override
+    public OrderGoods findById(Integer id) {
+        return orderGoodsMapper.selectById(id);
+    }
 }
