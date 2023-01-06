@@ -12,6 +12,7 @@ import com.ledao.entity.R;
 import com.ledao.service.AddressService;
 import com.ledao.service.CustomerService;
 import com.ledao.util.DateUtil;
+import com.ledao.util.JwtUtil;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -87,16 +88,19 @@ public class CustomerController {
         Map<String, Object> map = new HashMap<>(16);
         //根据顾客登录获得的code获得openid
         HashMap<String, Object> paramMap = new HashMap<>(16);
+        //配置文件地址
         String settingFileLocation = "E://data/mall/myConfig.setting";
+        //读取配置文件
         Setting setting = new Setting(settingFileLocation);
         paramMap.put("appid", setting.getStr("appid"));
         paramMap.put("secret", setting.getStr("secret"));
         paramMap.put("js_code", loginCode);
         paramMap.put("grant_type", "authorization_code");
+        //使用Hutool工具类库进行post请求
         String result = HttpUtil.post("https://api.weixin.qq.com/sns/jscode2session", paramMap);
         //使用Gson解析并获取openid
-        String openid = new JsonParser().parse(result).getAsJsonObject().get("openid").getAsString();
-        Customer customer = customerService.findByLoginCode(openid);
+        String openid = JsonParser.parseString(result).getAsJsonObject().get("openid").getAsString();
+        Customer customer = customerService.findByOpenid(openid);
         //顾客第一次使用小程序,把openid保存到数据库
         if (ObjectUtil.isNull(customer)) {
             Customer customer2 = new Customer();
@@ -104,12 +108,14 @@ public class CustomerController {
             customer2.setOpenid(openid);
             customer2.setAvatarImageName("default.jpg");
             customerService.add(customer2);
+            //不给顾客传openid
             customer2.setOpenid("");
             map.put("customer", customer2);
         } else {
             customer.setOpenid("");
             map.put("customer", customer);
         }
+        map.put("token", JwtUtil.createToken("customer"));
         return R.ok(map);
     }
 

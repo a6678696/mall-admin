@@ -8,6 +8,7 @@ import com.ledao.service.AnnouncementService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +37,7 @@ public class AnnouncementController {
      * @return
      */
     @GetMapping("/list")
-    public R list(Announcement announcement, @RequestParam(value = "page", required = false) Integer page, @RequestParam(value = "size", required = false) Integer size) {
+    public R list(Announcement announcement, @RequestParam(value = "page", required = false) Integer page, @RequestParam(value = "size", required = false) Integer size, HttpServletRequest request) {
         Map<String, Object> map = new HashMap<>(16);
         QueryWrapper<Announcement> queryWrapper = new QueryWrapper<>();
         if (announcement.getTitle() != null) {

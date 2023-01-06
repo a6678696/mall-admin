@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.ledao.entity.Administrator;
 import com.ledao.entity.R;
 import com.ledao.service.AdministratorService;
+import com.ledao.util.JwtUtil;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,6 +55,7 @@ public class AdministratorController {
                 Map<String, Object> map = new HashMap<>(16);
                 map.put("id", trueAdministrator.getId());
                 map.put("userName", trueAdministrator.getUserName());
+                map.put("token", JwtUtil.createToken("admin"));
                 return R.ok(map);
             } else {
                 return R.error("用户名或密码错误");

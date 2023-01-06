@@ -54,7 +54,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Customer findByLoginCode(String openid) {
+    public Customer findByOpenid(String openid) {
         QueryWrapper<Customer> customerQueryWrapper = new QueryWrapper<>();
         customerQueryWrapper.eq("openid", openid);
         return customerMapper.selectOne(customerQueryWrapper);

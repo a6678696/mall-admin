@@ -70,5 +70,5 @@ public interface CustomerService {
      * @param openid
      * @return
      */
-    Customer findByLoginCode(String openid);
+    Customer findByOpenid(String openid);
 }

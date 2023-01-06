@@ -103,12 +103,6 @@ public class GoodsController {
             goodsQueryWrapper.eq("smallTypeId", goods.getSmallTypeId());
         }
         if (goods.getName() != null) {
-            //分词搜索
-            /*String analysisedText = ToAnalysis.parse(goods.getName()).toStringWithOutNature();
-            String[] word = analysisedText.split(",");
-            for (String s : word) {
-                goodsQueryWrapper.or().like("name", s);
-            }*/
             goodsQueryWrapper.like("name", goods.getName()).or().like("description", goods.getName());
         }
         List<Goods> goodsList = goodsService.list(goodsQueryWrapper);
