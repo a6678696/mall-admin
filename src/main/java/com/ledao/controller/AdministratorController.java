@@ -55,7 +55,8 @@ public class AdministratorController {
                 Map<String, Object> map = new HashMap<>(16);
                 map.put("id", trueAdministrator.getId());
                 map.put("userName", trueAdministrator.getUserName());
-                map.put("token", JwtUtil.createToken("admin"));
+                //token有效时间是2小时
+                map.put("token", JwtUtil.createToken("admin", 1000 * 60 * 60 * 2));
                 return R.ok(map);
             } else {
                 return R.error("用户名或密码错误");

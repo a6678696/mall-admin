@@ -20,11 +20,6 @@ import java.util.UUID;
 public class JwtUtil {
 
     /**
-     * JWT Token有效时间，2小时 (单位是毫秒,1000毫秒=1秒)
-     */
-    private static final int TIME = 1000 * 60 * 60 * 2;
-
-    /**
      * 加密使用到的KEY
      */
     private static final String TOKEN_SECRET = "ledao";
@@ -33,9 +28,10 @@ public class JwtUtil {
      * 生成
      *
      * @param roleName 当前角色
+     * @param time     有效时间
      * @return
      */
-    public static String createToken(String roleName) {
+    public static String createToken(String roleName, int time) {
         return JWT.create()
                 //编号
                 .withJWTId(UUID.randomUUID().toString())
@@ -44,7 +40,7 @@ public class JwtUtil {
                 //签发时间
                 .withIssuedAt(new Date(System.currentTimeMillis()))
                 //过期时间
-                .withExpiresAt(new Date(System.currentTimeMillis() + TIME))
+                .withExpiresAt(new Date(System.currentTimeMillis() + time))
                 //受众
                 .withAudience(roleName)
                 //主题
@@ -68,12 +64,11 @@ public class JwtUtil {
             JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC512(TOKEN_SECRET)).build();
             jwtVerifier.verify(token);
         } catch (SignatureVerificationException e) {//token验证失败
-            return false;
+            throw new RuntimeException("token验证失败");
         } catch (TokenExpiredException e) {//token已过期
-            return false;
+            throw new RuntimeException("token已过期");
         } catch (Exception e) {//其它异常
-            System.out.println(e.getMessage());
-            return false;
+            throw new RuntimeException(e.getMessage());
         }
         return true;
     }
@@ -94,8 +89,8 @@ public class JwtUtil {
      * @param args
      */
     public static void main(String[] args) {
-        //生成token
-        String token = createToken("admin");
+        //生成token,有效时间为1小时
+        String token = createToken("admin", 1000 * 60 * 60);
         //打印token
         System.out.println(token);
         //验证token并返回结果

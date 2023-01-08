@@ -291,6 +291,29 @@ public class GoodsController {
     }
 
     /**
+     * md-editor-v3富文本编辑器上传图片
+     *
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/mdEditorUploadImage")
+    public Map<String,Object> mdEditorUploadImage(HttpServletRequest request) throws Exception {
+        //获取到文件
+        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+        MultipartFile multipartFile = multipartRequest.getFile("image");
+        //给图片定义一个名称
+        String newFileName = DateUtil.getCurrentDateStr2() + System.currentTimeMillis() + ".jpg";
+        assert multipartFile != null;
+        //实现将图片保存到指定位置
+        FileUtils.copyInputStreamToFile(multipartFile.getInputStream(), new File(goodsDetailsImageFilePath + "/" + newFileName));
+        //返回指定的格式给前端使用
+        Map<String, Object> resultMap = new HashMap<>(16);
+        resultMap.put("url", "http://localhost:" + port + "/image/goods/details/" + newFileName);
+        return resultMap;
+    }
+
+    /**
      * 设置商品卡片图片
      *
      * @param file

@@ -62,7 +62,11 @@ public class WebAppConfigurer implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         //不拦截的路径
-        String[] patterns = new String[]{"/administrator/login", "/customer/login", "/token/check"};
+        String[] patterns = new String[]{
+                "/administrator/login",
+                "/customer/login",
+                "/token/check"
+        };
         registry.addInterceptor(sysInterceptor())
                 .addPathPatterns("/**")
                 .excludePathPatterns(patterns);

@@ -115,7 +115,8 @@ public class CustomerController {
             customer.setOpenid("");
             map.put("customer", customer);
         }
-        map.put("token", JwtUtil.createToken("customer"));
+        //token有效时间是7天
+        map.put("token", JwtUtil.createToken("customer", 1000 * 60 * 60 * 24 * 7));
         return R.ok(map);
     }
 
